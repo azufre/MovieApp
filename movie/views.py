@@ -69,10 +69,20 @@ class RateReviewList(generics.ListAPIView):
     """
     List all the RateReviews and create ratereview
     """
-
-    queryset = RateReview.objects.all().order_by('-created_at')
+    
     serializer_class =  RateReviewSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+
+        queryset = RateReview.objects.all().order_by('-created_at')
+
+        query_id_movie = self.request.query_params.get('idmovie')
+
+        if query_id_movie is not None:
+            queryset = queryset.filter(movie__pk=query_id_movie)    
+
+        return queryset
 
 class RateReviewDetail(APIView):
 
