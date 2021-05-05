@@ -79,6 +79,11 @@ class RateReviewList(generics.ListAPIView):
 
         query_id_movie = self.request.query_params.get('idmovie')
 
+        try:
+            query_id_movie = int(query_id_movie)
+        except:
+            query_id_movie = 0    
+
         if query_id_movie is not None:
             queryset = queryset.filter(movie__pk=query_id_movie)    
 
