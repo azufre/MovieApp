@@ -9,16 +9,12 @@ from .models import Movie, RateReview
 from .serviceMovie import ServiceMovie
 
 # Create your views here.
-class MovieList(generics.ListCreateAPIView):
+class MovieList(generics.ListAPIView):
 
     """
     List all the Movies and create movie
     """
     serializer_class =  MovieSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(owner = self.request.user)
 
     def get_queryset(self):
 
@@ -30,6 +26,22 @@ class MovieList(generics.ListCreateAPIView):
             queryset = queryset.filter(title__icontains=query_title)    
 
         return queryset
+
+class MovieCreate(APIView):
+    
+    #serializer_class =  MovieSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, format=None):
+
+        serializer = MovieSerializer(data=request.data)
+        if serializer.is_valid():
+
+            serializer.save(owner = self.request.user)
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class MovieDetail(APIView):
 
@@ -57,7 +69,7 @@ class MovieDetail(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
 
     def delete(self, request, pk, format=None):
         movie = self.get_object(pk)
@@ -69,9 +81,8 @@ class RateReviewList(generics.ListAPIView):
     """
     List all the RateReviews and create ratereview
     """
-    
+
     serializer_class =  RateReviewSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
 
@@ -84,7 +95,7 @@ class RateReviewList(generics.ListAPIView):
         except:
             query_id_movie = 0    
 
-        if query_id_movie is not None:
+        if query_id_movie != 0:
             queryset = queryset.filter(movie__pk=query_id_movie)    
 
         return queryset

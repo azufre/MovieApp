@@ -43,15 +43,10 @@ class MovieApiViewTestCase(APITestCase):
     def api_authentication(self):
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
 
-    def test_movie_list_authenticated(self):
+    def test_movie_list(self):
 
         response = self.client.get(self.url_movie)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_movie_list_un_authenticated(self):
-        self.client.force_authenticate(user=None)
-        response = self.client.get(self.url_movie)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_movie_create_authenticated(self):
 
@@ -66,8 +61,8 @@ class MovieApiViewTestCase(APITestCase):
             "audience_score":0
             }
 
-        response = self.client.post(self.url_movie, data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post(reverse('moviecreate'), data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_movie_update_authenticated(self):
 
@@ -77,7 +72,7 @@ class MovieApiViewTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_movie_get_authenticated(self):
+    def test_movie_get_by_pk(self):
  
         response = self.client.get(reverse('movieDetail', kwargs={'pk':self.movie.pk}))
 
@@ -89,13 +84,13 @@ class MovieApiViewTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_movie_filter_authenticated(self):
+    def test_movie_filter(self):
  
         response = self.client.get(self.url_movie + f'?title={self.movie_title}')
         
         self.assertTrue(response.data)
 
-    def test_movie_filter_authenticated_fail(self):
+    def test_movie_filter_no_result(self):
 
         title_no_exist = 'la macarena'    
         response = self.client.get(self.url_movie + f'?title={title_no_exist}')
