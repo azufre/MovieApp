@@ -11,7 +11,7 @@ from .models import Movie, RateReview
 # Create your tests here.
 class MovieApiViewTestCase(APITestCase):
 
-    url_movie = reverse('movie')
+    url_movie = reverse('movieList')
     movie_title = "THE MATRIX 2"
 
     def setUp(self):
@@ -61,20 +61,20 @@ class MovieApiViewTestCase(APITestCase):
             "audience_score":0
             }
 
-        response = self.client.post(reverse('moviecreate'), data)
+        response = self.client.put(reverse('movieCreate'), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_movie_update_authenticated(self):
 
         self.movie.director = 'robert deniro'
  
-        response = self.client.put(reverse('movieDetail', kwargs={'pk':self.movie.pk}), self.movie.__dict__)
+        response = self.client.post(reverse('movieDetail', kwargs={'pk':self.movie.pk}), self.movie.__dict__)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_movie_get_by_pk(self):
  
-        response = self.client.get(reverse('movieDetail', kwargs={'pk':self.movie.pk}))
+        response = self.client.get(reverse('movieView', kwargs={'pk':self.movie.pk}))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -100,8 +100,8 @@ class MovieApiViewTestCase(APITestCase):
 
 class RateReviewApiView(APITestCase):
     
-    url_ratereview = reverse('ratereview')
-    url_ratereviewDetail = reverse('ratereviewDetail')
+    url_ratereviewList = reverse('ratereViewList')
+    url_ratereviewCreate = reverse('ratereViewCreate')
 
     def setUp(self):
 
@@ -138,7 +138,7 @@ class RateReviewApiView(APITestCase):
         self.ratereview = RateReview.objects.create(            
             movie =  self.movie,
             stars = 5,
-            rewiew =  'Nice movie',
+            review =  'Nice movie',
             owner = self.user2  
         )
 
@@ -153,26 +153,21 @@ class RateReviewApiView(APITestCase):
     def api_authentication(self):
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token}")
 
-    def test_ratereview_list_authenticated(self):
+    def test_ratereview_list(self):
 
-        response = self.client.get(self.url_ratereview)
+        response = self.client.get(self.url_ratereviewList)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_ratereview_list_un_authenticated(self):
-        self.client.force_authenticate(user=None)
-        response = self.client.get(self.url_ratereview)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_ratereview_filter_authenticated(self):
+    def test_ratereview_filter(self):
  
-        response = self.client.get(self.url_ratereview + f'?idmovie={self.movie.pk}')
+        response = self.client.get(self.url_ratereviewList + f'?idmovie={self.movie.pk}')
         
         self.assertTrue(response.data)
 
-    def test_ratereview_filter_authenticated_fail(self):
+    def test_ratereview_filter_fail(self):
 
         movie_id_wrong = '561655156ghf'    
-        response = self.client.get(self.url_ratereview + f'?idmovie={movie_id_wrong}')
+        response = self.client.get(self.url_ratereviewList + f'?idmovie={movie_id_wrong}')
         
         self.assertFalse(response.data)
 
@@ -181,10 +176,10 @@ class RateReviewApiView(APITestCase):
         data = {
             'movie':  self.movie.pk,
             'stars': 4,
-            'rewiew':  'Not bad movie',
+            'review':  'Not bad movie',
             }
 
-        response = self.client.put(self.url_ratereviewDetail, data)
+        response = self.client.put(self.url_ratereviewCreate, data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -193,11 +188,11 @@ class RateReviewApiView(APITestCase):
         data = {
             'movie':  self.movie.pk,
             'stars': 4,
-            'rewiew':  'Not bad movie',
+            'review':  'Not bad movie',
             }
 
         self.setUpAuthEnvToUser2()
 
-        response = self.client.put(self.url_ratereviewDetail, data)
+        response = self.client.put(self.url_ratereviewCreate, data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

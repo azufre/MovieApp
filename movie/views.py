@@ -28,13 +28,13 @@ class MovieList(generics.ListAPIView):
         return queryset
 
 class MovieCreate(APIView):
-    
-    #serializer_class =  MovieSerializer
+
+    serializer_class =  MovieSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, format=None):
+    def put(self, request, format=None):
 
-        serializer = MovieSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
 
             serializer.save(owner = self.request.user)
@@ -42,6 +42,20 @@ class MovieCreate(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class MovieViewSet(APIView):
+
+    serializer_class =  MovieSerializer
+
+    def get_object(self, pk):
+        try:
+            return Movie.objects.get(pk=pk)
+        except Movie.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        movie = self.get_object(pk)
+        serializer = self.serializer_class(movie)
+        return Response(serializer.data)
 
 class MovieDetail(APIView):
 
@@ -58,14 +72,9 @@ class MovieDetail(APIView):
         except Movie.DoesNotExist:
             raise Http404
 
-    def get(self, request, pk, format=None):
+    def post(self, request, pk, format=None):
         movie = self.get_object(pk)
-        serializer = MovieSerializer(movie)
-        return Response(serializer.data)
-
-    def put(self, request, pk, format=None):
-        movie = self.get_object(pk)
-        serializer = MovieSerializer(movie, data=request.data)
+        serializer = self.serializer_class(movie, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -88,19 +97,22 @@ class RateReviewList(generics.ListAPIView):
 
         queryset = RateReview.objects.all().order_by('-created_at')
 
-        query_id_movie = self.request.query_params.get('idmovie')
+        query_id_movie = self.request.query_params.get('idmovie', None)
+        
+        if query_id_movie is not None:
 
-        try:
-            query_id_movie = int(query_id_movie)
-        except:
-            query_id_movie = 0    
+            try:
 
-        if query_id_movie != 0:
+                query_id_movie = int(query_id_movie)
+
+            except:
+                query_id_movie = 0    
+
             queryset = queryset.filter(movie__pk=query_id_movie)    
 
         return queryset
 
-class RateReviewDetail(APIView):
+class RateReviewCreate(APIView):
 
     def __init__(self):
         self._serviceMovie = ServiceMovie()
@@ -114,7 +126,7 @@ class RateReviewDetail(APIView):
 
     def put(self, request, format=None):
 
-        serializer = RateReviewSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
 
             checkIfAlreadyExistReview = RateReview.objects.filter(owner__pk=request.user.pk, movie__pk=serializer.validated_data['movie'].pk).exists()

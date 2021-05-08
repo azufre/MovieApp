@@ -23,7 +23,7 @@ class Movie(models.Model):
 class RateReview(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     stars = models.IntegerField(default=1)
-    rewiew = models.CharField(max_length=255)
+    review = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

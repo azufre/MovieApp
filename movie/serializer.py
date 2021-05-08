@@ -33,7 +33,7 @@ class RateReviewSerializer(serializers.ModelSerializer):
             'pk',
             'movie', 
             'stars', 
-            'rewiew', 
+            'review', 
             'created_at', 
             'updated_at',
             'owner',
