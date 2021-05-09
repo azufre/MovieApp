@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'rl!94nv&5vl2y7=g+$#m52s5s(mb)#*t-=vm7!xmknz!=*u*#z'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['https://appmovietestbackend.herokuapp.com/']
 
